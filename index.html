@@ -38,6 +38,9 @@ h1,h2,h3{font-family:var(--serif);line-height:1.35;margin:0}
 b,strong{font-weight:700}
 .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:0 20px}
 @media (max-width:960px){.wrap{grid-template-columns:1fr;padding:0 16px}.side{display:none}}
+.navbtn{display:none}
+@media (max-width:960px){.navbtn{display:inline-flex}
+  body.navopen .side{display:block;position:fixed;top:var(--tbh,60px);left:12px;right:12px;max-height:72vh;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;z-index:30;box-shadow:0 12px 40px rgba(0,0,0,.25)}}
 
 /* top bar */
 .topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
@@ -220,6 +223,7 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:60px}
 
 <div class="topbar"><div class="in">
   <div class="brand">📘 國貿期中衝刺 Ch2–Ch6</div>
+  <button class="tg navbtn" id="tgNav" aria-expanded="false">☰ 目錄</button>
   <button class="tg" id="tgZh" aria-pressed="true">英文旁顯示中文</button>
   <button class="tg" id="tgPr" aria-pressed="false">練習模式（先藏答案）</button>
   <button class="tg" id="tgTh" aria-pressed="false">🌙 深色</button>
@@ -1917,6 +1921,16 @@ qs.forEach(function(q){var l=document.createElement('label');l.className='done';
   var c=l.querySelector('input');c.checked=sg('ib_d_'+q.id)==='1';c.onchange=function(){ss('ib_d_'+q.id,c.checked?'1':'0');prog();};});
 prog();
 
+// mobile table of contents
+var nb=document.getElementById('tgNav'),tb=document.querySelector('.topbar');
+function setNav(v){document.body.classList.toggle('navopen',v);nb.setAttribute('aria-expanded',v);document.documentElement.style.setProperty('--tbh',(tb.offsetHeight+6)+'px');}
+nb.onclick=function(e){e.stopPropagation();setNav(!document.body.classList.contains('navopen'));};
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){
+  var el=document.getElementById(a.getAttribute('href').slice(1));if(!el)return;e.preventDefault();setNav(false);
+  var y=el.getBoundingClientRect().top+window.pageYOffset-tb.offsetHeight-10;window.scrollTo({top:y,behavior:'smooth'});
+  try{history.replaceState(null,'',a.getAttribute('href'));}catch(err){}
+});});
+document.addEventListener('click',function(e){if(document.body.classList.contains('navopen')&&!e.target.closest('.side'))setNav(false);});
 // glossary
 var gl=G.filter(function(g){return g[4]==='t';}).slice().sort(function(a,b){return a[1].toLowerCase()<b[1].toLowerCase()?-1:1;});
 var seenD={};gl=gl.filter(function(g){if(seenD[g[1]])return false;seenD[g[1]]=1;return true;});
